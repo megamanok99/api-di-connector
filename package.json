@@ -1,0 +1,27 @@
+{
+  "name": "api-di-connector",
+  "version": "1.0.0",
+  "description": "generate api from swagger",
+  "main": "index.js",
+  "scripts": {
+    "test": "gen-api"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/megamanok99/api-di-connector.git"
+  },
+  "keywords": [
+    "api-connector"
+  ],
+  "author": "gorbunov alex",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/megamanok99/api-di-connector/issues"
+  },
+  "homepage": "https://github.com/megamanok99/api-di-connector#readme",
+  "dependencies": {
+    "enquirer": "^2.4.1",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.3.2"
+  }
+}
