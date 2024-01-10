@@ -1,5 +1,6 @@
 {
   "name": "api-di-connector",
+  "type": "module",
   "version": "1.0.0",
   "description": "generate api from swagger",
   "main": "index.js",
@@ -22,6 +23,6 @@
   "dependencies": {
     "enquirer": "^2.4.1",
     "fs": "^0.0.1-security",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.6.6"
   }
 }
