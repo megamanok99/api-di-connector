@@ -113,11 +113,11 @@ const generateRestClient = (isJs = true) => {
   
   
   `;
-  fs.writeFile(`restClient.${isJs ? 'js' : 'ts'}`, restClient, (err) => {
+  fs.writeFile(`./service/apiService/restClient.${isJs ? 'js' : 'ts'}`, restClient, (err) => {
     if (err) {
       console.log(err);
     }
-    console.log('generated restClient');
+    console.log('restClient generated successfully ');
   });
 };
 export default generateRestClient;
