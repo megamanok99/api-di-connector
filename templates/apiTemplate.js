@@ -6,7 +6,7 @@ import ApiConnector from '../restClient';
 class ${name} {
       ${arr
         .map((el) =>
-          generateController(el.name, el.method, el.url, el?.parameters, el?.requestBody),
+          generateController(el.name, el.method, el.url, el?.parameters, el?.requestBody, el),
         )
         .join('\n')}
              }
@@ -14,12 +14,30 @@ export default ${name};
     `;
 };
 
-const generateController = (name, method, url, parameters = [], requestBody) => {
-  // console.log(`element is`, el);
+const generateController = (name, method, url, parameters = [], requestBody, elem) => {
+  console.log(`element is`, elem);
   const link = '`' + `${url.replace('{', '${')}` + '`';
   const params = parameters?.map((el) => el.name.replace('-', '')).join(',');
 
-  return `static ${name}(${params}${params && requestBody?.content ? ',' : ''}${
+  return `
+  /**
+ * @description  ${elem?.summary}
+ * ${parameters
+   ?.map(
+     (el) =>
+       '@params ' +
+       '{' +
+       el.name +
+       '}' +
+       ' обязательность - ' +
+       el?.required +
+       ' тип данных - ' +
+       el?.schema?.type,
+   )
+   .join('\n')}
+ */
+  
+  static ${name}(${params}${params && requestBody?.content ? ',' : ''}${
     requestBody?.content ? 'data' : ''
   }) {
       return ApiConnector.${method}(${link}${requestBody?.content ? ',' + 'data' : ''});
@@ -49,6 +67,7 @@ export const generateApi = (paths) => {
           name: paths[key]?.post?.operationId,
           requestBody: paths[key]?.post?.requestBody,
           parameters: paths[key]?.post?.parameters,
+          summary: paths[key]?.post?.summary,
         });
       }
       if (paths[key]?.get?.tags[0] === array[i]) {
@@ -58,6 +77,7 @@ export const generateApi = (paths) => {
           url: key,
           name: paths[key]?.get?.operationId,
           parameters: paths[key]?.get?.parameters,
+          summary: paths[key]?.get?.summary,
         });
       }
     }
