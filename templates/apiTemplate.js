@@ -16,8 +16,19 @@ export default ${name};
 
 const generateController = (name, method, url, parameters = [], requestBody, elem) => {
   console.log(`element is`, elem);
-  const link = '`' + `${url.replace('{', '${')}` + '`';
-  const params = parameters?.map((el) => el.name.replace('-', '')).join(',');
+  const queryParams =
+    parameters
+      ?.filter((elem) => elem.in === 'query')
+      ?.map((el) => el.name + '=' + '${' + el.name + '}') || [];
+  const link =
+    '`' +
+    `${url.replace('{', '${')}` +
+    (queryParams.length > 0 ? '?' + queryParams.join('&') : '') +
+    '`';
+  const params = parameters
+    ?.filter((elem) => elem.in !== 'header')
+    ?.map((el) => el.name.replace('-', ''))
+    .join(',');
 
   return `
   /**
@@ -37,21 +48,43 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
    .join('\n')}
  */
   
-  static ${name}(${params}${params && requestBody?.content ? ',' : ''}${
+  static ${removeAfterUnderscore(name)}(${params}${params && requestBody?.content ? ',' : ''}${
     requestBody?.content ? 'data' : ''
   }) {
       return ApiConnector.${method}(${link}${requestBody?.content ? ',' + 'data' : ''});
     }
     `;
 };
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1).replace('-', '');
+
+function removeAfterUnderscore(inputString) {
+  const underscoreIndex = inputString.indexOf('_');
+
+  if (underscoreIndex !== -1) {
+    return inputString.slice(0, underscoreIndex);
+  } else {
+    return inputString;
+  }
 }
+function capitalizeFirstLetter(string) {
+  console.log(string?.split('-'));
+  console.log(
+    string
+      ?.split('-')
+      .map((word, index) => (index === -1 ? word : word.charAt(0).toUpperCase() + word.slice(1))),
+  );
+  return string
+    ?.split('-')
+    ?.map((word, index) => word.charAt(0).toUpperCase() + word.slice(1))
+    ?.join('');
+}
+
 export const generateApi = (paths) => {
   const listOfClass = new Set();
   for (let key in paths) {
     paths[key]?.post?.tags[0] && listOfClass.add(paths[key]?.post?.tags[0]);
     paths[key]?.get?.tags[0] && listOfClass.add(paths[key]?.get?.tags[0]);
+    paths[key]?.patch?.tags[0] && listOfClass.add(paths[key]?.patch?.tags[0]);
+    paths[key]?.delete?.tags[0] && listOfClass.add(paths[key]?.delete?.tags[0]);
   }
 
   const array = Array.from(listOfClass);
@@ -78,6 +111,27 @@ export const generateApi = (paths) => {
           name: paths[key]?.get?.operationId,
           parameters: paths[key]?.get?.parameters,
           summary: paths[key]?.get?.summary,
+        });
+      }
+
+      if (paths[key]?.delete?.tags[0] === array[i]) {
+        cont.push({
+          ...paths[key],
+          method: 'deleteAxios',
+          url: key,
+          name: paths[key]?.delete?.operationId,
+          parameters: paths[key]?.delete?.parameters,
+          summary: paths[key]?.delete?.summary,
+        });
+      }
+      if (paths[key]?.patch?.tags[0] === array[i]) {
+        cont.push({
+          ...paths[key],
+          method: 'patchAxios',
+          url: key,
+          name: paths[key]?.patch?.operationId,
+          parameters: paths[key]?.patch?.parameters,
+          summary: paths[key]?.patch?.summary,
         });
       }
     }
