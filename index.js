@@ -50,7 +50,7 @@ const run = async () => {
     console.log('Directory already exists.');
   }
 
-  generateRestClient(true);
+  generateRestClient(drink);
 
   fetchSwagger(name);
   // const resp = getTodos(name);

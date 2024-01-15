@@ -1,5 +1,5 @@
 import fs from 'fs';
-const generateRestClient = (isJs = true) => {
+const generateRestClient = (isJs) => {
   const restClient = `
 
 
@@ -113,7 +113,7 @@ const generateRestClient = (isJs = true) => {
   
   
   `;
-  fs.writeFile(`./service/apiService/restClient.${isJs ? 'js' : 'ts'}`, restClient, (err) => {
+  fs.writeFile(`./service/apiService/restClient.${isJs}`, restClient, (err) => {
     if (err) {
       console.log(err);
     }

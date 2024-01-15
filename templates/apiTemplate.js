@@ -15,7 +15,6 @@ export default ${name};
 };
 
 const generateController = (name, method, url, parameters = [], requestBody, elem) => {
-  console.log(`element is`, elem);
   const queryParams =
     parameters
       ?.filter((elem) => elem.in === 'query')
@@ -66,12 +65,6 @@ function removeAfterUnderscore(inputString) {
   }
 }
 function capitalizeFirstLetter(string) {
-  console.log(string?.split('-'));
-  console.log(
-    string
-      ?.split('-')
-      .map((word, index) => (index === -1 ? word : word.charAt(0).toUpperCase() + word.slice(1))),
-  );
   return string
     ?.split('-')
     ?.map((word, index) => word.charAt(0).toUpperCase() + word.slice(1))
