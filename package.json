@@ -8,6 +8,9 @@
     "gen-api": "node index.js",
     "postinstall": "npm run gen-api"
   },
+  "bin": {
+    "gen-api": "./index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/megamanok99/api-di-connector.git"
