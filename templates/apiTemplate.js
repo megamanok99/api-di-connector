@@ -1,6 +1,6 @@
 import fs from 'fs';
-
-const genApiClass = (name, arr) => {
+import { processClass } from './generateApiDiContainter.js';
+export const genApiClass = (name, arr) => {
   return `
 import ApiConnector from '../restClient';
 class ${name} {
@@ -55,7 +55,7 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
     `;
 };
 
-function removeAfterUnderscore(inputString) {
+export function removeAfterUnderscore(inputString) {
   const underscoreIndex = inputString.indexOf('_');
 
   if (underscoreIndex !== -1) {
@@ -64,11 +64,88 @@ function removeAfterUnderscore(inputString) {
     return inputString;
   }
 }
-function capitalizeFirstLetter(string) {
-  return string
-    ?.split('-')
+export function capitalizeFirstLetter(string) {
+  return transliterate(string)
+    ?.split(/[-\s]/)
     ?.map((word, index) => word.charAt(0).toUpperCase() + word.slice(1))
     ?.join('');
+}
+
+function transliterate(word) {
+  let a = {
+    Ё: 'YO',
+    Й: 'I',
+    Ц: 'TS',
+    У: 'U',
+    К: 'K',
+    Е: 'E',
+    Н: 'N',
+    Г: 'G',
+    Ш: 'SH',
+    Щ: 'SCH',
+    З: 'Z',
+    Х: 'H',
+    Ъ: 'b',
+    ё: 'yo',
+    й: 'i',
+    ц: 'ts',
+    у: 'u',
+    к: 'k',
+    е: 'e',
+    н: 'n',
+    г: 'g',
+    ш: 'sh',
+    щ: 'sch',
+    з: 'z',
+    х: 'h',
+    ъ: 'b',
+    Ф: 'F',
+    Ы: 'I',
+    В: 'V',
+    А: 'A',
+    П: 'P',
+    Р: 'R',
+    О: 'O',
+    Л: 'L',
+    Д: 'D',
+    Ж: 'ZH',
+    Э: 'E',
+    ф: 'f',
+    ы: 'i',
+    в: 'v',
+    а: 'a',
+    п: 'p',
+    р: 'r',
+    о: 'o',
+    л: 'l',
+    д: 'd',
+    ж: 'zh',
+    э: 'e',
+    Я: 'Ya',
+    Ч: 'CH',
+    С: 'S',
+    М: 'M',
+    И: 'I',
+    Т: 'T',
+    Ь: 'b',
+    Б: 'B',
+    Ю: 'YU',
+    я: 'ya',
+    ч: 'ch',
+    с: 's',
+    м: 'm',
+    и: 'i',
+    т: 't',
+    ь: 'b',
+    б: 'b',
+    ю: 'yu',
+  };
+  return word
+    .split('')
+    .map(function (char) {
+      return a[char] || char;
+    })
+    .join('');
 }
 
 export const generateApi = (paths) => {
@@ -86,9 +163,13 @@ export const generateApi = (paths) => {
     let cont = [];
     for (let key in paths) {
       if (paths[key]?.post?.tags[0] === array[i]) {
+        let check = Object.hasOwn(
+          paths[key]?.post?.responses['200']?.content || {},
+          'application/octet-stream',
+        );
         cont.push({
           ...paths[key],
-          method: 'postAxios',
+          method: check ? 'postAxiosBlob' : 'postAxios',
           url: key,
           name: paths[key]?.post?.operationId,
           requestBody: paths[key]?.post?.requestBody,
@@ -128,8 +209,7 @@ export const generateApi = (paths) => {
         });
       }
     }
-
-    // console.log(`we find`, cont);
+    processClass(array[i]);
 
     fs.writeFile(
       `./service/apiService/api/Api${capitalizeFirstLetter(array[i])}.js`,

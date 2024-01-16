@@ -5,7 +5,7 @@
   "description": "generate api from swagger",
   "main": "index.js",
   "scripts": {
-    "test": "gen-api"
+    "gen-api": "node index.js"
   },
   "repository": {
     "type": "git",
