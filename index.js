@@ -1,60 +1,49 @@
-// ES Modules
-import fetch from 'node-fetch';
-
 import pkg from 'enquirer';
 import fs from 'fs';
+import { fetchSwagger } from './fetch.js';
 import { generateApi } from './templates/apiTemplate.js';
+import { generateInterfaces } from './templates/generateInterface.js';
 import generateRestClient from './templates/generateRestClient.js';
-
-// const { Input, AutoComplete } = require('enquirer');
-// const fetch = require('node-fetch');
-// const fs = require('fs');
 const { Input, AutoComplete } = pkg;
-
-// directory path
 const dir = './service/apiService/api';
-
-// create new directory
-
-// Expect a normal string input from the user
-const askName = new Input({
-  name: 'name',
+const askUrl = new Input({
+  name: 'url',
   message: 'добавьте ссылку на сваггер',
 });
-
-// Let the user choose one answer
-const askDrink = new AutoComplete({
-  name: 'drink',
+const askLang = new AutoComplete({
+  name: 'lang',
   message: 'Какой язык в проекте?',
 
   choices: ['js', 'ts'],
 });
-async function fetchSwagger(url) {
-  const response = await fetch(url);
-  const data = await response.json();
-
-  const { paths } = data;
-
-  generateApi(paths);
-}
 
 const run = async () => {
-  const name = await askName.run();
+  try {
+    const url = await askUrl.run();
 
-  const drink = await askDrink.run();
+    const lang = await askLang.run();
+    fetchSwagger(url).then((data) => {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      generateRestClient(lang, data.servers[0]?.url);
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-    console.log('Directory is created.');
-  } else {
-    console.log('Directory already exists.');
+      try {
+        lang == 'ts' && generateInterfaces(data.components.schemas);
+        console.log('🟢:Interfaces generated successfully ');
+      } catch (err) {
+        console.log(`🔴:`, err);
+      }
+
+      try {
+        generateApi(data.paths, lang);
+        console.log('🟢:ApiDiContainer generated successfully ');
+      } catch (err) {
+        console.log(`🔴:`, err);
+      }
+    });
+  } catch {
+    console.warn('generation is suspended');
   }
-
-  generateRestClient(drink);
-
-  fetchSwagger(name);
-  // const resp = getTodos(name);
-  // console.log(resp);
 };
-
 run();

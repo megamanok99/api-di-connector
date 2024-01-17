@@ -1,20 +1,20 @@
 import fs from 'fs';
+import { convertToCustomFormat, findRequestBodyType } from '../tools.js';
 import { processClass } from './generateApiDiContainter.js';
-export const genApiClass = (name, arr) => {
+export const genApiClass = (name, arr, lang) => {
   return `
 import ApiConnector from '../restClient';
 class ${name} {
       ${arr
         .map((el) =>
-          generateController(el.name, el.method, el.url, el?.parameters, el?.requestBody, el),
+          generateController(el.name, el.method, el.url, el?.parameters, el?.requestBody, el, lang),
         )
         .join('\n')}
              }
-export default ${name};
-    `;
+export default ${name};`;
 };
 
-const generateController = (name, method, url, parameters = [], requestBody, elem) => {
+const generateController = (name, method, url, parameters = [], requestBody, elem, lang) => {
   const queryParams =
     parameters
       ?.filter((elem) => elem.in === 'query')
@@ -28,7 +28,26 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
     ?.filter((elem) => elem.in !== 'header')
     ?.map((el) => el.name.replace('-', ''))
     .join(',');
+  const paramsTs = parameters
+    ?.filter((elem) => elem.in !== 'header')
+    ?.map((el) => el.name.replace('-', '') + ':' + el?.schema?.type)
+    .join(',');
 
+  const requestBodyTS = findRequestBodyType(requestBody) || '';
+
+  const check = (type, body) => {
+    if (type == 'js') {
+      return '';
+    } else if (type == 'ts') {
+      if (body) {
+        return ':';
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  };
   return `
   /**
  * @description  ${elem?.summary}
@@ -45,11 +64,14 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
        el?.schema?.type,
    )
    .join('\n')}
+
  */
   
-  static ${removeAfterUnderscore(name)}(${params}${params && requestBody?.content ? ',' : ''}${
-    requestBody?.content ? 'data' : ''
-  }) {
+  static ${removeAfterUnderscore(name)}(${lang === 'js' ? params : paramsTs}${
+    params && requestBody?.content ? ',' : ''
+  }${requestBody?.content ? 'data' : ''}${check(lang, requestBody?.content)}${
+    lang === 'js' ? '' : requestBodyTS
+  }) ${lang === 'js' ? '' : ': Promise<AxiosResponse<any>>'}{
       return ApiConnector.${method}(${link}${requestBody?.content ? ',' + 'data' : ''});
     }
     `;
@@ -148,7 +170,7 @@ function transliterate(word) {
     .join('');
 }
 
-export const generateApi = (paths) => {
+export const generateApi = (paths, lang) => {
   const listOfClass = new Set();
   for (let key in paths) {
     paths[key]?.post?.tags[0] && listOfClass.add(paths[key]?.post?.tags[0]);
@@ -171,7 +193,7 @@ export const generateApi = (paths) => {
           ...paths[key],
           method: check ? 'postAxiosBlob' : 'postAxios',
           url: key,
-          name: paths[key]?.post?.operationId,
+          name: convertToCustomFormat(key),
           requestBody: paths[key]?.post?.requestBody,
           parameters: paths[key]?.post?.parameters,
           summary: paths[key]?.post?.summary,
@@ -182,7 +204,7 @@ export const generateApi = (paths) => {
           ...paths[key],
           method: 'getAxios',
           url: key,
-          name: paths[key]?.get?.operationId,
+          name: convertToCustomFormat(key),
           parameters: paths[key]?.get?.parameters,
           summary: paths[key]?.get?.summary,
         });
@@ -193,7 +215,7 @@ export const generateApi = (paths) => {
           ...paths[key],
           method: 'deleteAxios',
           url: key,
-          name: paths[key]?.delete?.operationId,
+          name: convertToCustomFormat(key),
           parameters: paths[key]?.delete?.parameters,
           summary: paths[key]?.delete?.summary,
         });
@@ -203,22 +225,22 @@ export const generateApi = (paths) => {
           ...paths[key],
           method: 'patchAxios',
           url: key,
-          name: paths[key]?.patch?.operationId,
+          name: convertToCustomFormat(key),
           parameters: paths[key]?.patch?.parameters,
           summary: paths[key]?.patch?.summary,
         });
       }
     }
-    processClass(array[i]);
+    processClass(array[i], lang);
 
     fs.writeFile(
-      `./service/apiService/api/Api${capitalizeFirstLetter(array[i])}.js`,
-      genApiClass(`Api${capitalizeFirstLetter(array[i])}`, cont),
+      `./service/apiService/api/Api${capitalizeFirstLetter(array[i])}.${lang}`,
+      genApiClass(`Api${capitalizeFirstLetter(array[i])}`, cont, lang),
       (err) => {
         if (err) {
-          console.log(err);
+          console.log(`🔴:`, err);
         }
-        console.log('Api classes generated successfully ');
+        console.log(`🟢:class Api${capitalizeFirstLetter(array[i])} generated successfully `);
       },
     );
   }

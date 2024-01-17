@@ -1,5 +1,5 @@
 import fs from 'fs';
-const generateRestClient = (isJs) => {
+const generateRestClient = (isJs, url) => {
   const restClient = `
 
 
@@ -10,11 +10,11 @@ const generateRestClient = (isJs) => {
     retries: 2,
   });
   function makeUrls() {
-    return 'http://ya.ru';
+    return '${url}';
   }
   
   class RestClient {
-    static getAxios(url ${isJs ? '' : ': string'}, additionalHeaders = {}) {
+    static getAxios(url ${isJs === 'js' ? '' : ': string'}, additionalHeaders = {}) {
       const config = {
         method: 'get',
         url: makeUrls() + url,
@@ -25,7 +25,7 @@ const generateRestClient = (isJs) => {
       };
       return axios(config);
     }
-    static getAxiosBlob(url ${isJs ? '' : ': string'}, additionalHeaders = {}) {
+    static getAxiosBlob(url ${isJs === 'js' ? '' : ': string'}, additionalHeaders = {}) {
       const config = {
         method: 'get',
         reponseType: 'blob',
@@ -39,21 +39,21 @@ const generateRestClient = (isJs) => {
       };
       return axios(config);
     }
-    static getBlob(url${isJs ? '' : ': string'}, additionalHeaders = {}) {
+    static getBlob(url${isJs === 'js' ? '' : ': string'}, additionalHeaders = {}) {
       return fetch(makeUrls() + url, {
         headers: {
           accept: '*/*',
           'accept-language': 'ru,en;q=0.9,la;q=0.8',
           authorization: 'Bearer ' + sessionStorage.getItem('token'),
-          Referer: 'http://188.120.235.15:9401/swagger-ui/index.html',
+        
           'Referrer-Policy': 'strict-origin-when-cross-origin',
         },
         body: null,
         method: 'GET',
       });
     }
-    static postAxios(url${isJs ? '' : ': string'}, data${
-    isJs ? '' : ': object'
+    static postAxios(url${isJs === 'js' ? '' : ': string'}, data${
+    isJs === 'js' ? '' : '?: any'
   }, additionalHeaders = {}) {
       const config = {
         method: 'post',
@@ -67,8 +67,8 @@ const generateRestClient = (isJs) => {
       return axios(config);
     }
   
-    static postAxiosBlob(url${isJs ? '' : ': string'}, data${
-    isJs ? '' : ': object'
+    static postAxiosBlob(url${isJs === 'js' ? '' : ': string'}, data${
+    isJs === 'js' ? '' : '?: any'
   }, additionalHeaders = {}) {
       const config = {
         method: 'post',
@@ -84,7 +84,7 @@ const generateRestClient = (isJs) => {
       return axios(config);
     }
   
-    static patchAxios(url${isJs ? '' : ': string'}, data${isJs ? '' : ': object'}) {
+    static patchAxios(url${isJs === 'js' ? '' : ': string'}, data${isJs === 'js' ? '' : '?: any'}) {
       const config = {
         method: 'patch',
         url: makeUrls() + url,
@@ -97,7 +97,7 @@ const generateRestClient = (isJs) => {
       return axios(config);
     }
   
-    static async deleteAxios(url${isJs ? '' : ': string'}) {
+    static async deleteAxios(url${isJs === 'js' ? '' : ': string'}) {
       const config = {
         method: 'delete',
         url: makeUrls() + url,
@@ -115,9 +115,9 @@ const generateRestClient = (isJs) => {
   `;
   fs.writeFile(`./service/apiService/restClient.${isJs}`, restClient, (err) => {
     if (err) {
-      console.log(err);
+      console.log(`🔴:`, err);
     }
-    console.log('restClient generated successfully ');
+    console.log('🟢:restClient generated successfully ');
   });
 };
 export default generateRestClient;
