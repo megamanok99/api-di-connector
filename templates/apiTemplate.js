@@ -4,6 +4,7 @@ import { processClass } from './generateApiDiContainter.js';
 export const genApiClass = (name, arr, lang) => {
   return `
 import ApiConnector from '../restClient';
+${lang == 'js' ? '' : "import {AxiosResponse} from 'axios'"}
 class ${name} {
       ${arr
         .map((el) =>
