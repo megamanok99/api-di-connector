@@ -37,7 +37,7 @@ const run = async () => {
       }
 
       try {
-        generateApi(data.paths, lang);
+        generateApi(data.paths, lang, data.components.schemas);
         console.log('🟢:ApiDiContainer generated successfully ');
       } catch (err) {
         console.log(`🔴:`, err);

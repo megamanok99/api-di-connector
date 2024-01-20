@@ -42,7 +42,7 @@ export function generateInterfaces(obj) {
     processEntity(entityName, obj[entityName]);
   }
 
-  return fs.writeFile(`./service/apiService/inreface.ts`, result, (err) => {
+  return fs.writeFile(`./service/apiService/intrefaces.ts`, result, (err) => {
     if (err) {
       // console.log(err);
     }

@@ -1,10 +1,21 @@
 import fs from 'fs';
-import { convertToCustomFormat, findRequestBodyType } from '../tools.js';
+import {
+  convertToCustomFormat,
+  findRequestBodyType,
+  findResponseType,
+  replaceTypes,
+} from '../tools.js';
 import { processClass } from './generateApiDiContainter.js';
-export const genApiClass = (name, arr, lang) => {
+export const genApiClass = (name, arr, lang, typesForImport) => {
   return `
 import ApiConnector from '../restClient';
 ${lang == 'js' ? '' : "import {AxiosResponse} from 'axios'"}
+${
+  lang == 'js'
+    ? ''
+    : 'import {' + Object.keys(typesForImport)?.join(',') + "} from '../intrefaces.ts'"
+}
+
 class ${name} {
       ${arr
         .map((el) =>
@@ -31,7 +42,7 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
     .join(',');
   const paramsTs = parameters
     ?.filter((elem) => elem.in !== 'header')
-    ?.map((el) => el.name.replace('-', '') + ':' + el?.schema?.type)
+    ?.map((el) => el.name.replace('-', '') + ':' + replaceTypes(el?.schema?.type))
     .join(',');
 
   const requestBodyTS = findRequestBodyType(requestBody) || '';
@@ -72,7 +83,9 @@ const generateController = (name, method, url, parameters = [], requestBody, ele
     params && requestBody?.content ? ',' : ''
   }${requestBody?.content ? 'data' : ''}${check(lang, requestBody?.content)}${
     lang === 'js' ? '' : requestBodyTS
-  }) ${lang === 'js' ? '' : ': Promise<AxiosResponse<any>>'}{
+  }) ${
+    lang === 'js' ? '' : `: Promise<AxiosResponse<${findResponseType(elem?.responses) || 'any'}>>`
+  }{
       return ApiConnector.${method}(${link}${requestBody?.content ? ',' + 'data' : ''});
     }
     `;
@@ -171,7 +184,7 @@ function transliterate(word) {
     .join('');
 }
 
-export const generateApi = (paths, lang) => {
+export const generateApi = (paths, lang, typesForImport) => {
   const listOfClass = new Set();
   for (let key in paths) {
     paths[key]?.post?.tags[0] && listOfClass.add(paths[key]?.post?.tags[0]);
@@ -198,6 +211,7 @@ export const generateApi = (paths, lang) => {
           requestBody: paths[key]?.post?.requestBody,
           parameters: paths[key]?.post?.parameters,
           summary: paths[key]?.post?.summary,
+          responses: paths[key]?.post?.responses,
         });
       }
       if (paths[key]?.get?.tags[0] === array[i]) {
@@ -208,6 +222,7 @@ export const generateApi = (paths, lang) => {
           name: convertToCustomFormat(key),
           parameters: paths[key]?.get?.parameters,
           summary: paths[key]?.get?.summary,
+          responses: paths[key]?.get?.responses,
         });
       }
 
@@ -219,6 +234,7 @@ export const generateApi = (paths, lang) => {
           name: convertToCustomFormat(key),
           parameters: paths[key]?.delete?.parameters,
           summary: paths[key]?.delete?.summary,
+          responses: paths[key]?.delete?.responses,
         });
       }
       if (paths[key]?.patch?.tags[0] === array[i]) {
@@ -229,6 +245,7 @@ export const generateApi = (paths, lang) => {
           name: convertToCustomFormat(key),
           parameters: paths[key]?.patch?.parameters,
           summary: paths[key]?.patch?.summary,
+          responses: paths[key]?.patch?.responses,
         });
       }
     }
@@ -236,7 +253,7 @@ export const generateApi = (paths, lang) => {
 
     fs.writeFile(
       `./service/apiService/api/Api${capitalizeFirstLetter(array[i])}.${lang}`,
-      genApiClass(`Api${capitalizeFirstLetter(array[i])}`, cont, lang),
+      genApiClass(`Api${capitalizeFirstLetter(array[i])}`, cont, lang, typesForImport),
       (err) => {
         if (err) {
           console.log(`🔴:`, err);

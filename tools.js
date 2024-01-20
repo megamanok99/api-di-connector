@@ -45,7 +45,7 @@ export function generateInterfaceName(name) {
     return null;
   }
 }
-function replaceTypes(prop) {
+export function replaceTypes(prop) {
   let types = {
     integer: 'number',
   };
@@ -56,14 +56,31 @@ function replaceTypes(prop) {
   }
 }
 export function findRequestBodyType(obj) {
-  console.log(obj);
   if (obj?.content['application/json']?.schema?.items?.$ref) {
-    console.log(obj?.content['application/json']?.schema?.items.$ref);
     return generateInterfaceName(obj.content['application/json']?.schema?.items.$ref) + '[]';
   } else if (obj?.content['application/json']?.schema?.$ref) {
     return generateInterfaceName(obj.content['application/json']?.schema?.$ref);
   } else if (obj?.content['application/json']?.schema?.type) {
     return replaceTypes(obj?.content['application/json']?.schema?.type);
+  } else {
+    null;
+  }
+}
+export function findResponseType(obj) {
+  if (obj['200']) {
+    if (obj['200']?.content) {
+      if (obj['200']?.content['*/*'].schema?.items?.type) {
+        return obj['200']?.content['*/*'].schema?.items?.type + '[]';
+      } else if (obj['200']?.content['*/*'].schema?.items?.$ref) {
+        return generateInterfaceName(obj['200']?.content['*/*'].schema?.items?.$ref + '[]');
+      } else if (obj['200']?.content['*/*'].schema.$ref) {
+        return generateInterfaceName(obj['200']?.content['*/*'].schema?.$ref);
+      } else if (obj['200']?.content['*/*'].schema?.type) {
+        return replaceTypes(obj['200']?.content['*/*'].schema?.type);
+      } else null;
+    } else {
+      return null;
+    }
   } else {
     null;
   }
