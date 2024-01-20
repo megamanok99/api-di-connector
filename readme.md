@@ -28,13 +28,36 @@ npx api-di-connector
 
 ```bash
 √ Add Swagger Link: example.com/v3/api-docs
-```
-
-## Project Language
-
-```bash
 √ Project Language: js/ts
 ```
+
+# Details
+
+This repository contains a service implementation with the following directory structure:
+service
+|-- ApiService
+| |-- api
+| | |-- ApiModule1Class1
+| |-- ApiDiContainer
+| |-- RestClient
+| |-- interfaces (optional for TypeScript)
+| |-- SwaggerSchemas
+
+## ApiService
+
+The ApiService directory encompasses the core functionality of the service.
+
+## ApiDiContainer
+
+The ApiDiContainer is a dependency injection container that consolidates all classes defined in the api directory. It serves as a centralized mechanism for managing dependencies within the service.
+
+## RestClient
+
+The RestClient module defines the basic methods for interacting with the axios library, providing a foundation for making HTTP requests. It encapsulates common functionalities required for communication with external APIs.
+
+## TypeScript Interfaces (optional)
+
+If TypeScript is chosen as the language, the interfaces directory contains TypeScript interfaces that represent the schemas defined in the Swagger documentation
 
 ## Features
 
