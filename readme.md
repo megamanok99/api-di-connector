@@ -9,51 +9,31 @@ The `api-di-connector` package provides the ability to generate connectors for w
 ## Installation
 
 ```bash
-npm install api-di-connector
+npm i -D api-di-connector
 ```
 
-## Usage
+## Additional packages for production
 
-Example usage:
+```bash
+npm i axios axios-retry
+```
+
+## Example
 
 ```javascript
-npm run gen-api
+npx api-di-connector
 ```
 
-````bash
 # User Console Operations
-
-## Add Swagger Link
 
 ```bash
 √ Add Swagger Link: example.com/v3/api-docs
-````
+```
 
 ## Project Language
 
 ```bash
-√ Project Language: js
-```
-
-## Check Directory
-
-```bash
-Directory already exists.
-```
-
-## Generate restClient
-
-```bash
-√ restClient generated successfully
-```
-
-## Generate API Classes
-
-```bash
-√ Api classes generated successfully
-√ Api classes generated successfully
-√ Api classes generated successfully
-√ Api classes generated successfully
+√ Project Language: js/ts
 ```
 
 ## Features
@@ -63,12 +43,11 @@ Directory already exists.
 - Generation of annotations for controllers.
 - Use of Bearer authorization in request headers.
 
-## Example
+## Usage
 
 ```javascript
 // Example usage of generated connectors
 import ApiDiContainer from '@service/apiService/apiDiContainer';
-
 ApiDiContainer.ProxyApiUser.getUsers().then((res) => {
   this.setState({ listOfUser: res.data });
 });
