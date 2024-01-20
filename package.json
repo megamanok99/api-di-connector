@@ -1,7 +1,7 @@
 {
   "name": "api-di-connector",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "generate api from swagger",
   "main": "index.js",
   "scripts": {
