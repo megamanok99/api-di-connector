@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 import pkg from 'enquirer';
 import fs from 'fs';
 import { fetchSwagger } from './fetch.js';

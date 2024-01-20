@@ -5,11 +5,10 @@
   "description": "generate api from swagger",
   "main": "index.js",
   "scripts": {
-    "gen-api": "node index.js",
-    "postinstall": "npm run gen-api"
+    "gen-api": "node index.js"
   },
   "bin": {
-    "gen-api": "node index.js"
+    "api-di-connector": "./index.js"
   },
   "repository": {
     "type": "git",
