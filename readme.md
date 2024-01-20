@@ -34,6 +34,8 @@ npx api-di-connector
 # Details
 
 This repository contains a service implementation with the following directory structure:
+
+```bash
 service
 |-- ApiService
 | |-- api
@@ -42,6 +44,7 @@ service
 | |-- RestClient
 | |-- interfaces (optional for TypeScript)
 | |-- SwaggerSchemas
+```
 
 ## ApiService
 
